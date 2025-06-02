@@ -1,23 +1,18 @@
-"use client"
-
-// Inspired by react-hot-toast library
 import * as React from "react"
 
 import type {
-  ToasterProps,
-} from "sonner"
+  ToastActionElement,
+  ToastProps,
+} from "@/components/ui/toast"
 
 const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 1000000
 
-type ToasterToast = ToasterProps & {
+type ToasterToast = ToastProps & {
   id: string
   title?: React.ReactNode
   description?: React.ReactNode
-  action?: React.ReactNode
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
-  variant?: "default" | "destructive" | "success" | "warning" | "info"; // Added variant property
+  action?: ToastActionElement
 }
 
 const actionTypes = {
@@ -160,7 +155,7 @@ function toast({ ...props }: Toast) {
       ...props,
       id,
       open: true,
-      onOpenChange: (open: boolean) => {
+      onOpenChange: (open) => {
         if (!open) dismiss()
       },
     },
