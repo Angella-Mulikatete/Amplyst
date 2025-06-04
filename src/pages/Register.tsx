@@ -65,12 +65,7 @@ const Register = () => {
     }catch(err: any){
       setError(err.errors?.[0]?.message || "Sign up failed");
     }
-    // if (selectedRole === "influencer") {
-    //   navigate("/onboarding/influencer");
-    // } else {
-    //   // Handle other role registrations - redirect to appropriate dashboards
-    //   console.log("Registration completed for:", selectedRole);
-    // }
+
   };
 
   if (step === "role") {
@@ -175,16 +170,7 @@ if (step === "details" && selectedRole) {
           <form onSubmit={handleSubmit}>
             {selectedRole === "influencer" && (
               <>
-                {/* <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First name</Label>
-                    <Input id="firstName" placeholder="Sarah" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Last name</Label>
-                    <Input id="lastName" placeholder="Johnson" />
-                  </div>
-                </div> */}
+      
                 <div className="space-y-2">
                   <Label htmlFor="username">Username</Label>
                   <Input id="username" placeholder="@Angella" />
@@ -257,32 +243,9 @@ if (step === "details" && selectedRole) {
               <Label htmlFor="password">Password</Label>
               <Input id="password" type="password" placeholder="Create a password" required />
             </div>
-            
-            {/* <Button 
-              type="submit"
-              className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90 font-poppins"
-            >
-              Create Account
-            </Button> */}
+ 
           </form>
-          
-          {/* <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
-            </div>
-          </div>
-          <Button variant="outline" className="w-full hover:bg-primary hover:text-white transition-colors duration-200">
-            Continue with Google
-          </Button> */}
-          {/* <div className="text-center text-sm">
-            Already have an account?{" "}
-            <Link to="/login" className="text-primary hover:underline">
-              Sign in
-            </Link>
-          </div> */}
+
           <div className="text-center">
             <button 
               onClick={() => setStep("role")}
