@@ -1,5 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+
 import { Doc, Id } from "./_generated/dataModel";
 //import bcrypt from "bcryptjs";
 
@@ -7,10 +8,12 @@ import { Doc, Id } from "./_generated/dataModel";
 export const getMyProfile = query({
   handler: async (ctx): Promise<Doc<"profiles"> | null> => {
     const identity = await ctx.auth.getUserIdentity();
+
     if (!identity || !identity.tokenIdentifier) {
       return null;
     }
     const user = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier)).unique();
+
     if (!user) {
       return null;
     }
@@ -49,12 +52,23 @@ export const insertProfile = mutation({
       },
       handler: async (ctx, args) => {
         const identity = await ctx.auth.getUserIdentity();
+
         if (!identity || !identity.tokenIdentifier) {
+
           throw new Error("User not authenticated");
         }
         const user = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier)).unique();
         if (!user) {
           throw new Error("User not found in database");
+        }
+
+        const user = await ctx.db
+          .query("users")
+          .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
+          .unique();
+
+        if (!user) {
+          throw new Error("Authenticated user not found in users table");
         }
 
         const existingProfile = await ctx.db

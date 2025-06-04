@@ -1,6 +1,5 @@
 import { mutation, query } from "./_generated/server";
     import { v } from "convex/values";
-    import { getAuthUserId } from "@convex-dev/auth/server";
     import { Doc, Id } from "./_generated/dataModel";
 
     export const createCampaign = mutation({
@@ -14,10 +13,20 @@ import { mutation, query } from "./_generated/server";
         duration: v.optional(v.string()),
       },
       handler: async (ctx, args) => {
-        const userId = await getAuthUserId(ctx);
-        if (!userId) {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
           throw new Error("User not authenticated");
         }
+
+        const user = await ctx.db
+          .query("users")
+          .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
+          .unique();
+
+        if (!user) {
+          throw new Error("Authenticated user not found in users table");
+        }
+        const userId = user._id;
 
         // Optional: Check if user has 'brand' or 'agency' role
         const profile = await ctx.db.query("profiles").withIndex("by_userId", q => q.eq("userId", userId)).unique();

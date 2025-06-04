@@ -17,6 +17,7 @@ export interface SocialMediaAccount {
   tiktok: string;
   youtube: string;
   twitter: string;
+  [key: string]: string; // Add index signature to allow string indexing
 }
 
 export interface SocialMediaProfileData {
