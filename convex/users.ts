@@ -1,19 +1,22 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
 import { Doc, Id } from "./_generated/dataModel";
-import bcrypt from "bcryptjs";
+//import bcrypt from "bcryptjs";
 
 // Query to get the current user's profile
 export const getMyProfile = query({
   handler: async (ctx): Promise<Doc<"profiles"> | null> => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity || !identity.tokenIdentifier) {
+      return null;
+    }
+    const user = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier)).unique();
+    if (!user) {
       return null;
     }
     const profile = await ctx.db
       .query("profiles")
-      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
       .unique();
       return profile;
   },
@@ -45,25 +48,29 @@ export const insertProfile = mutation({
 
       },
       handler: async (ctx, args) => {
-        const userId = await getAuthUserId(ctx);
-        if (!userId) {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity || !identity.tokenIdentifier) {
           throw new Error("User not authenticated");
+        }
+        const user = await ctx.db.query("users").withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier)).unique();
+        if (!user) {
+          throw new Error("User not found in database");
         }
 
         const existingProfile = await ctx.db
           .query("profiles")
-          .withIndex("by_userId", (q) => q.eq("userId", userId))
+          .withIndex("by_userId", (q) => q.eq("userId", user._id))
           .unique();
 
         if (existingProfile) {
           await ctx.db.patch(existingProfile._id, {
             ...args,
-            userId, // Ensure userId is always set
+            userId: user._id, // Ensure userId is always set
           });
           return existingProfile._id;
         } else {
           const profileId = await ctx.db.insert("profiles", {
-            userId,
+            userId: user._id,
             ...args,
           });
           return profileId;
